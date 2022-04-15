@@ -1,6 +1,8 @@
 package com.example.room_database;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,4 +37,6 @@ public class NewNoteActivity extends AppCompatActivity {
             }
         });
     }
+
+
 }

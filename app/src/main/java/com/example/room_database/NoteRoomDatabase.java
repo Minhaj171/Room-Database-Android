@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase;
  * Created by Md Minhajul Islam on 4/15/2022.
  */
 
-@Database(entities = Note.class, version = 1)
+@Database(entities={Note.class},version = 1)
 public abstract class NoteRoomDatabase extends RoomDatabase {
 
     public abstract NoteDao noteDao();

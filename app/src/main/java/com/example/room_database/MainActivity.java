@@ -3,7 +3,10 @@ package com.example.room_database;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,22 +15,31 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.List;
 import java.util.UUID;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NoteListAdapter.OnDeleteClickListener {
     private static final int NEW_NOTE_ACTIVITY_REQUEST_CODE = 1;
     public static final int UPDATE_NOTE_ACTIVITY_REQUEST_CODE = 2;
     private String TAG = this.getClass().getSimpleName();
     private NoteViewModel noteViewModel;
+    private NoteListAdapter noteListAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        //Toolbar toolbar = findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerview);
+        noteListAdapter = new NoteListAdapter(this, this);
+        recyclerView.setAdapter(noteListAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(),RecyclerView.VERTICAL, false));
+
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -40,6 +52,17 @@ public class MainActivity extends AppCompatActivity {
 
         noteViewModel = new ViewModelProvider(this).get(NoteViewModel.class);
 
+        noteViewModel.getAllNotes().observe(this, new Observer<List<Note>>() {
+            @Override
+            public void onChanged(List<Note> notes) {
+                if (notes!= null){
+                    noteListAdapter.setNotes(notes);
+                }else {
+                    Toast.makeText(getApplicationContext(),"Your request is not valid",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
     }
 
     @Override
@@ -55,11 +78,24 @@ public class MainActivity extends AppCompatActivity {
                     getApplicationContext(),
                     R.string.saved,
                     Toast.LENGTH_LONG).show();
-        }else {
+        }else if (requestCode == UPDATE_NOTE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+
+            // Code to update the note
+            Note note = new Note(
+                    data.getStringExtra(EditNoteActivity.NOTE_ID),
+                    data.getStringExtra(EditNoteActivity.UPDATED_NOTE));
+            noteViewModel.update(note);
+
             Toast.makeText(
                     getApplicationContext(),
-                    R.string.not_saved,
+                    R.string.updated,
                     Toast.LENGTH_LONG).show();
+
         }
+    }
+
+    @Override
+    public void OnDeleteClickListener(Note myNote) {
+        noteViewModel.delete(myNote);
     }
 }
